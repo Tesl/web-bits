@@ -1,0 +1,74 @@
+<!--HTML Part--!>
+<!--Any time you want to submit information using a button(which is characterized by the "submit" input type) enclose all desired input entries in <form> tags.--!>
+<!--The 'action' of your form denotes the page the action is to take place. Since we want users to submit information, we set the 'method' of the registration form to 'POST'.--!>
+ 
+  <form action="registration.php" method="POST">
+    <input type="text" name="first_name" size="15" placeholder="First name" value="<?php if (isset($_POST['first_name'])) echo htmlentities($_POST['first_name']); ?>" /><br /><br /><br />
+    <input type="text" name="last_name" size="15" placeholder="Last name" value="<?php if (isset($_POST['last_name'])) echo htmlentities($_POST['last_name']); ?>" /><br /><br /><br />
+    <input type="email" name="email" id="email" size="15" placeholder="Email" value="<?php if (isset($_POST['email'])) echo htmlentities($_POST['email']); ?>" /><br /><br /><br />
+    <input type="text" name="username" id="username" size="25" placeholder="Desired username..." onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false" autocomplete=off value="<?php if (isset($_POST['email2'])) echo htmlentities($_POST['email2']); ?>" /><br /><br /><br />
+    <input type="password" name="password" id="password" size="15" placeholder="New password" /><br /><br /><br />
+    <input type="submit" name="register" value="Sign Me Up!"><br />
+  </form>
+   
+<!--For this registration form, we will prompt the user to provide their first & last name, e-mail, desired username and password.--!>
+<!--Things start to get a bit more technical when we reach the 'value".."' part as part of a convenience & security function for the user and your website by using a PHP block (<?php...?>) which will contain any function-based code you want for your system with reference to the 'name="..."' attribute--!>
+<!--If something were to interfere a user's registration experience (accidental refresh, unsuccessful registration attempt, ect...) we want to make sure that the entries that were filled in do not reset so that the user won't have to re-fill everything from the start ( which may demotivate the user from registering).--!>
+<!--That is where the code in between the php block makes sure that if a specific entry is filled in, that input is automatically "echoed" (an echo can simply be understand as a display function). -->
+<!--The "htmlentities(...)" is a security measure that "neutralizes" the user input that may hold malicious code capable of damaging your application (be sure to look up SQL-Injection for further insight).-->
+
+
+<!--PHP Part--!>
+<!-- If you haven't done so, have a database table containing your users' information prepared.The names of the rows should correspond with the 'name="..."' attributes of your <input> tags. --!>
+
+
+<?php
+ error_reporting(E_ALL ^ E_NOTICE);
+ ini_set('display_errors',1);
+ ini_set('display_startup_errors',1);
+  $reg = $_POST['register'];
+  //initializing registration variables to prevent errors
+  $fn = ""; //first name
+  $ln = ""; //last name
+  $em = ""; //email
+  $un = ""; //username
+  $pass = ""; //password
+  
+  //registration variables + form
+  $fn = mysqli_real_escape_string($con, $_POST['first_name']);
+  $ln = mysqli_real_escape_string($con, $_POST['last_name']);
+  $em = mysqli_real_escape_string($con, $_POST['email']);
+  $un = mysqli_real_escape_string($con, $_POST['username']);
+  $pass = mysqli_real_escape_string($con, $_POST['password']);
+  //mysqli_real_escape_string() is a security measure
+
+  if(isset($_POST['register'])) {
+    
+        //check if all fields have been filled
+        if($fn && $ln && $em && $un && $pass) {
+          //check the maximum length of relevant fields
+          if(strlen($fn)>90||strlen($ln)>90) {
+            echo "Max limit for first/last names is 90 characters.";
+          }
+          else{
+            if (strlen($pass)<6||strlen($pass)>99) {
+              echo "Password must be 6 and 99 characters long.";
+            }
+            else {
+              $pass = md5($pass);
+              $regSQLI = "INSERT INTO users (id, email, first_name, last_name, user_name, password, activated) VALUES ('','$em','$fn','$ln', '$un', '$pass','0')"; //order of the variables must correspond with the list position the database row names.
+              $regQuery = mysqli_query($con, $regSQLI);
+              
+            }
+          }
+          header("location: next_page_after_registration.php");
+          exit();
+          }
+          else {
+            echo '<div id="regerrormsg">Fill in all required fields. </div>';
+          }
+        }
+        
+    }
+    ?>
+    <!--An even better use of code syntax would be the use of PDO or prepared statements--!>
