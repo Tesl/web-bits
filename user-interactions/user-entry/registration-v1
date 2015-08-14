@@ -71,4 +71,4 @@
         
     }
     ?>
-    <!--An even better use of code syntax would be the use of PDO or prepared statements--!>
+    <!--An even better use of code syntax would be the use of PDO or prepared statements for proper security measures.--!>
